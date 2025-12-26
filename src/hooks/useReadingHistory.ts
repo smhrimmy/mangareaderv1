@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
 interface ReadingProgress {
@@ -19,21 +18,9 @@ export const useReadingHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchHistory = useCallback(async () => {
-    if (!user) {
-      setHistory([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("reading_history")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("read_at", { ascending: false });
-
-    if (data && !error) {
-      setHistory(data);
-    }
+    // Since we removed Supabase, this hook currently does nothing or could use local storage
+    // For now, return empty to prevent errors
+    setHistory([]);
     setIsLoading(false);
   }, [user]);
 
@@ -47,29 +34,7 @@ export const useReadingHistory = () => {
     pageNumber: number,
     totalPages: number
   ) => {
-    if (!user) return;
-
-    const progressPercentage = Math.round((pageNumber / totalPages) * 100);
-    const completed = pageNumber >= totalPages;
-
-    const { error } = await supabase
-      .from("reading_history")
-      .upsert({
-        user_id: user.id,
-        manga_id: mangaId,
-        chapter_id: chapterId,
-        page_number: pageNumber,
-        total_pages: totalPages,
-        progress_percentage: progressPercentage,
-        completed,
-        read_at: new Date().toISOString()
-      }, {
-        onConflict: "user_id,manga_id,chapter_id"
-      });
-
-    if (!error) {
-      fetchHistory();
-    }
+    // No-op for now
   };
 
   const getProgress = (mangaId: string, chapterId: string): ReadingProgress | undefined => {

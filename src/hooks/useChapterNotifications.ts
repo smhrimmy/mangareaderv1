@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
@@ -16,20 +15,7 @@ export const useChapterNotifications = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSubscriptions = useCallback(async () => {
-    if (!user) {
-      setSubscriptions([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("chapter_notifications")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (data && !error) {
-      setSubscriptions(data);
-    }
+    setSubscriptions([]);
     setIsLoading(false);
   }, [user]);
 
@@ -42,54 +28,12 @@ export const useChapterNotifications = () => {
       toast.error("Please login to enable notifications");
       return;
     }
-
-    const { error } = await supabase
-      .from("chapter_notifications")
-      .upsert({
-        user_id: user.id,
-        manga_id: mangaId,
-        email_enabled: emailEnabled
-      }, {
-        onConflict: "user_id,manga_id"
-      });
-
-    if (error) {
-      toast.error("Failed to enable notifications");
-    } else {
-      toast.success("Notifications enabled!");
-      fetchSubscriptions();
-    }
+    toast.info("Notifications feature requires backend update");
   };
 
-  const unsubscribeFromManga = async (mangaId: string) => {
-    if (!user) return;
+  const unsubscribeFromManga = async (mangaId: string) => {};
 
-    const { error } = await supabase
-      .from("chapter_notifications")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("manga_id", mangaId);
-
-    if (!error) {
-      toast.success("Notifications disabled");
-      fetchSubscriptions();
-    }
-  };
-
-  const toggleEmailNotifications = async (mangaId: string, enabled: boolean) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from("chapter_notifications")
-      .update({ email_enabled: enabled })
-      .eq("user_id", user.id)
-      .eq("manga_id", mangaId);
-
-    if (!error) {
-      toast.success(enabled ? "Email notifications enabled" : "Email notifications disabled");
-      fetchSubscriptions();
-    }
-  };
+  const toggleEmailNotifications = async (mangaId: string, enabled: boolean) => {};
 
   const isSubscribed = (mangaId: string): boolean => {
     return subscriptions.some(s => s.manga_id === mangaId);
