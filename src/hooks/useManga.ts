@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { mangaService } from "@/services/MangaService";
+import { mangaService } from "@/services/mangaService";
 import { fetchChapterMetadata } from "@/services/mangadex"; // Keep specific metadata fetch for now or move to service
 
 export const useMangaList = (options: { query?: string, limit?: number, sort?: any, ids?: string[], includeNsfw?: boolean, source?: string } = {}) => {

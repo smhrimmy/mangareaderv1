@@ -71,12 +71,16 @@ export const fetchMangaList = async (options: {
 
   try {
     const response = await fetch(`${BASE_URL}/manga?${params.toString()}`);
-    if (!response.ok) throw new Error("Failed to fetch manga list");
+    if (!response.ok) {
+        console.error(`MangaDex API Error: ${response.status} ${response.statusText}`);
+        throw new Error("Failed to fetch manga list");
+    }
     
     const data = await response.json();
+    console.log(`Fetched ${data.data.length} manga from MangaDex`);
     return data.data.map((m: MangaDexManga) => transformManga(m));
   } catch (error) {
-    console.error(error);
+    console.error("Fetch Manga List Error:", error);
     return [];
   }
 };
