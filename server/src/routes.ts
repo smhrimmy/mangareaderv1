@@ -9,10 +9,27 @@ const cache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 const commonHeaders = {
-  "User-Agent": USER_AGENT,
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.5",
+  "Referer": "https://www.google.com/",
 };
+
+// Debug Route
+router.get("/debug/fetch", async (req, res) => {
+    const url = req.query.url as string;
+    if (!url) return res.status(400).send("URL required");
+    try {
+        const response = await fetch(url, { headers: commonHeaders });
+        res.json({
+            status: response.status,
+            headers: Object.fromEntries(response.headers.entries()),
+            ok: response.ok
+        });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
 const cached = (fn: Function) => async (req: any, res: any) => {
     // Basic cache implementation

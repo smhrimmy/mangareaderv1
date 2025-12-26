@@ -25,4 +25,8 @@ app.use("*", (req, res) => {
   });
 });
 
+export const config = {
+  runtime: 'nodejs', // Force Node.js runtime
+};
+
 export default app;
