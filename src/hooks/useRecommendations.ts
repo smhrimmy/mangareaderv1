@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useReadingHistory } from "./useReadingHistory";
 import { useWatchlist } from "./useWatchlist";
@@ -13,7 +14,9 @@ interface Recommendation {
 }
 
 export const useRecommendations = (currentMangaId?: string) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { history } = useReadingHistory();
+  const { watchlist } = useWatchlist();
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +26,10 @@ export const useRecommendations = (currentMangaId?: string) => {
     setError(null);
 
     try {
+      // Mock recommendations if edge function fails or for demo
+      // In a real app, we'd call the edge function
+      // const { data, error: fnError } = await supabase.functions.invoke("get-recommendations", { ... });
+      
       // Fallback/Demo implementation: Fetch popular manga
       const popular = await fetchMangaList({ limit: 4, sort: { followedCount: "desc" } });
       const recs = popular
@@ -47,7 +54,7 @@ export const useRecommendations = (currentMangaId?: string) => {
 
   useEffect(() => {
     fetchRecommendations();
-  }, [user, currentMangaId]); 
+  }, [user, currentMangaId]);
 
   return {
     recommendations,

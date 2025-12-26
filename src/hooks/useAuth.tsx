@@ -1,126 +1,133 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface User {
+interface Profile {
   id: string;
-  email: string;
-  username: string;
-  avatar_url?: string;
-  bio?: string;
-  favorite_genres?: string[];
-  theme?: string;
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  favorite_genres: string[];
+  theme: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
+  profile: Profile | null;
   isLoading: boolean;
   signUp: (email: string, password: string, username: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signOut: () => void;
-  updateProfile: (updates: Partial<User>) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper to fetch user if token exists
-  const fetchUser = async (token: string) => {
+  const fetchProfile = async (userId: string) => {
     try {
-      const res = await fetch('/api/auth/user', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
-      } else {
-        // Token invalid
-        localStorage.removeItem('auth_token');
-        setUser(null);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      
+      if (data && !error) {
+        setProfile(data as Profile);
       }
     } catch (e) {
-      console.error("Auth check failed", e);
-    } finally {
-      setIsLoading(false);
+      console.error("Profile fetch error", e);
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      fetchUser(token);
-    } else {
-      setIsLoading(false);
-    }
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+            fetchProfile(session.user.id);
+        }
+        setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, username: string) => {
-    try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, username })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        return { error: new Error(data.error || 'Signup failed') };
+    const redirectUrl = `${window.location.origin}/`;
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: { username }
       }
-
-      localStorage.setItem('auth_token', data.token);
-      setUser(data.user);
-      toast.success("Welcome! Account created.");
-      return { error: null };
-    } catch (e: any) {
-      return { error: e };
-    }
+    });
+    
+    if (error) return { error };
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        return { error: new Error(data.error || 'Login failed') };
-      }
-
-      localStorage.setItem('auth_token', data.token);
-      setUser(data.user);
-      toast.success("Welcome back!");
-      return { error: null };
-    } catch (e: any) {
-      return { error: e };
-    }
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    return { error };
   };
 
-  const signOut = () => {
-    localStorage.removeItem('auth_token');
-    setUser(null);
-    toast.info("Signed out");
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setProfile(null);
   };
 
-  const updateProfile = async (updates: Partial<User>) => {
-    // Ideally create an /api/auth/update endpoint. 
-    // For now we'll just update local state to reflect changes instantly.
+  const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: new Error("Not authenticated") };
     
-    // Simulate API call success
-    setUser({ ...user, ...updates });
-    return { error: null };
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("user_id", user.id);
+    
+    if (!error) {
+      setProfile(prev => prev ? { ...prev, ...updates } : null);
+    }
+    
+    return { error };
   };
 
   return (
     <AuthContext.Provider value={{ 
       user, 
+      session, 
+      profile, 
       isLoading, 
       signUp, 
       signIn, 
