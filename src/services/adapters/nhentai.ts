@@ -2,7 +2,7 @@ import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
 // Use relative path to allow Vite proxy (dev) and Vercel functions (prod) to handle it
-const API_BASE = "/api/sources/nhentai";
+const API_BASE = "/api/nhentai";
 const IMAGE_BASE_URL = "https://i.nhentai.net/galleries";
 
 export const NHentaiAdapter: MangaSourceAdapter = {

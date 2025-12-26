@@ -1,7 +1,7 @@
 import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
-const API_BASE = "/api/sources/ao3";
+const API_BASE = "/api/ao3";
 
 export const AO3Adapter: MangaSourceAdapter = {
   id: "ao3",

@@ -1,7 +1,7 @@
 import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
-const API_BASE = "/api/sources/fictionzone";
+const API_BASE = "/api/fictionzone";
 
 export const FictionZoneAdapter: MangaSourceAdapter = {
   id: "fictionzone",

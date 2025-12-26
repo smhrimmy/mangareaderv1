@@ -1,7 +1,7 @@
 import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
-const API_BASE = "/api/sources/scribblehub";
+const API_BASE = "/api/scribblehub";
 
 export const ScribbleHubAdapter: MangaSourceAdapter = {
   id: "scribblehub",

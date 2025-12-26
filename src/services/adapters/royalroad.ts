@@ -1,7 +1,7 @@
 import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
-const API_BASE = "/api/sources/royalroad";
+const API_BASE = "/api/royalroad";
 
 export const RoyalRoadAdapter: MangaSourceAdapter = {
   id: "royalroad",

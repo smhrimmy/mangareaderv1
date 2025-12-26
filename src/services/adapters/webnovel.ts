@@ -1,7 +1,7 @@
 import { Manga, Chapter } from "@/lib/data";
 import { MangaSourceAdapter, SearchOptions } from "./types";
 
-const API_BASE = "/api/sources/webnovel";
+const API_BASE = "/api/webnovel";
 
 export const WebnovelAdapter: MangaSourceAdapter = {
   id: "webnovel",
