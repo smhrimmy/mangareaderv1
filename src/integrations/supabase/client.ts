@@ -1,16 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://mztozufmxdukkknhcaka.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16dG96dWZteGR1a2trbmhjYWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3NzA2OTgsImV4cCI6MjA4MjM0NjY5OH0.bE5ovQXlbLdycpuTWmNafmzNOWpningwsjil99XHBH0";
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
   console.error("Missing Supabase credentials");
 }
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL || '',
-  SUPABASE_PUBLISHABLE_KEY || '',
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
   {
     auth: {
       storage: localStorage,
