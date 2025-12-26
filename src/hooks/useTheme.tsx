@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useAuth } from "./useAuth";
-import { supabase } from "@/integrations/supabase/client";
 
 type Theme = "light" | "dark" | "system";
 
@@ -20,7 +19,7 @@ const getSystemTheme = (): "light" | "dark" => {
 };
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const { user, profile, updateProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [theme, setThemeState] = useState<Theme>(() => {
     // Check localStorage first
     const stored = localStorage.getItem("theme") as Theme | null;
@@ -31,13 +30,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const resolvedTheme = theme === "system" ? getSystemTheme() : theme;
-
-  // Sync with user profile on login
-  useEffect(() => {
-    if (profile?.theme && profile.theme !== theme) {
-      setThemeState(profile.theme as Theme);
-    }
-  }, [profile]);
 
   // Apply theme to document
   useEffect(() => {
@@ -68,10 +60,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     // Persist to profile if logged in
     if (user) {
-      await supabase
-        .from("profiles")
-        .update({ theme: newTheme })
-        .eq("user_id", user.id);
+      await updateProfile({ theme: newTheme });
     }
   };
 
