@@ -6,6 +6,11 @@ import { NHentaiAdapter } from "./adapters/nhentai";
 import { ComickAdapter } from "./adapters/comick";
 import { ConsumetAdapter } from "./adapters/consumet";
 import { MangaHookAdapter } from "./adapters/mangahook";
+import { AO3Adapter } from "./adapters/ao3";
+import { RoyalRoadAdapter } from "./adapters/royalroad";
+import { ScribbleHubAdapter } from "./adapters/scribblehub";
+import { FictionZoneAdapter } from "./adapters/fictionzone";
+import { WebnovelAdapter } from "./adapters/webnovel";
 import { Manga, Chapter } from "@/lib/data";
 import { ChapterResolver } from "./ChapterResolver";
 
@@ -21,6 +26,11 @@ class MangaService {
     this.registerAdapter(ComickAdapter);
     this.registerAdapter(ConsumetAdapter);
     this.registerAdapter(MangaHookAdapter);
+    this.registerAdapter(AO3Adapter);
+    this.registerAdapter(RoyalRoadAdapter);
+    this.registerAdapter(ScribbleHubAdapter);
+    this.registerAdapter(FictionZoneAdapter);
+    this.registerAdapter(WebnovelAdapter);
     this.chapterResolver = new ChapterResolver(this.adapters);
   }
 
